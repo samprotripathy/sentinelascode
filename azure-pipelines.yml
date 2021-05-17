@@ -1,39 +1,29 @@
-# Analytics Rules build and deploy pipeline
-# This pipeline publishes the rules file as an artifact and then uses a powershell task to deploy
+# Scripts build pipeline
+# Copies script files to the agent and publishes an artifact with them
 
-name: build and deploy Alert Rules
-resources:
- pipelines:
-   - pipeline: Scripts
-     source: 'scriptsCI'
 trigger:
  paths:
    include:
-     - AnalyticsRules/*
+     - Scripts/*
 
-stages:
-- stage: build_alert_rules
+pool:
+  vmImage: 'windows-2019'
 
-  jobs:
-    - job: AgentJob
-      pool:
-       name: Azure Pipelines
-       vmImage: 'windows-2019'
-      steps:
-       - task: CopyFiles@2
-         displayName: 'Copy Alert Rules'
-         inputs:
-          SourceFolder: AnalyticsRules
-          TargetFolder: '$(Pipeline.Workspace)'
-       - task: Files-Validator@1
-         inputs:
-           rootDir: '$(Pipeline.Workspace)/*.ps1'
-           validateXML: false
-           validateJSON: true
-           validateYAML: false
-           validatePS: true
-       - task: PublishBuildArtifacts@1
-         displayName: 'Publish Artifact: RulesFile'
-         inputs:
-          PathtoPublish: '$(Pipeline.Workspace)'
-          ArtifactName: RulesFile
+steps:
+- task: CopyFiles@2
+  displayName: 'Copy Scripts'
+  inputs:
+    SourceFolder: Scripts
+    TargetFolder: '$(build.artifactstagingdirectory)'
+- task: Files-Validator@1
+  inputs:
+    rootDir: '$(build.artifactstagingdirectory)/*.ps1'
+    validateXML: false
+    validateJSON: false
+    validateYAML: false
+    validatePS: true
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Pipeline Artifact'
+  inputs:
+    targetPath: Scripts
+    artifact: Scripts
