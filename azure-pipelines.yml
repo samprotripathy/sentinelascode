@@ -18,7 +18,7 @@ stages:
     - job: AgentJob
       pool:
        name: Azure Pipelines
-       vmImage: 'vs2017-win2016'
+       vmImage: 'windows-2019'
       steps:
        - task: CopyFiles@2
          displayName: 'Copy Alert Rules'
@@ -27,11 +27,11 @@ stages:
           TargetFolder: '$(Pipeline.Workspace)'
        - task: Files-Validator@1
          inputs:
-           rootDir: '$(Pipeline.Workspace)/*.json'
+           rootDir: '$(Pipeline.Workspace)/*.ps1'
            validateXML: false
            validateJSON: true
            validateYAML: false
-           validatePS: false
+           validatePS: true
        - task: PublishBuildArtifacts@1
          displayName: 'Publish Artifact: RulesFile'
          inputs:
